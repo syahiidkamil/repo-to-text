@@ -1,0 +1,15 @@
+.js
+.ts
+.java
+.py
+.txt
+.md
+.json
+.xml
+.html
+.css
+.scss
+.less
+.sql
+.yaml
+.yml
