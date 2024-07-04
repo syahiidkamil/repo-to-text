@@ -1,0 +1,8 @@
+**/.git/**
+**/__MACOSX/**
+**/._*
+**/.DS_Store
+**/Thumbs.db
+**/node_modules/**
+**/.idea/**
+**/.mvn/**

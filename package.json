@@ -1,7 +1,7 @@
 {
   "name": "repo-to-pdf",
-  "version": "1.0.0",
-  "description": "Convert a Git repository or zip file to PDF",
+  "version": "1.1.0",
+  "description": "Convert a Git repository or zip file to PDF with advanced filtering",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -10,6 +10,7 @@
     "simple-git": "^3.19.0",
     "pdfkit": "^0.13.0",
     "dotenv": "^16.0.3",
-    "adm-zip": "^0.5.10"
+    "adm-zip": "^0.5.10",
+    "minimatch": "^5.1.0"
   }
 }
