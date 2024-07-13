@@ -40,9 +40,15 @@ async function extractZip(zipPath) {
   return extractPath;
 }
 
-async function convertToPDF(inputPath) {
+async function convertToOutput(inputPath) {
   const git = simpleGit();
-  const doc = new PDFDocument();
+  const outputFormat = process.env.OUTPUT_FORMAT || "pdf";
+  let doc;
+  let txtContent = "";
+
+  if (outputFormat === "pdf") {
+    doc = new PDFDocument();
+  }
 
   try {
     let localPath = inputPath;
@@ -58,9 +64,11 @@ async function convertToPDF(inputPath) {
     // Get list of files
     const files = await getFiles(localPath);
 
-    // Create PDF
-    const outputPdfName = process.env.OUTPUT_PDF_NAME || "output.pdf";
-    doc.pipe(fs.createWriteStream(outputPdfName));
+    // Create output file
+    const outputName = process.env.OUTPUT_NAME || `output.${outputFormat}`;
+    if (outputFormat === "pdf") {
+      doc.pipe(fs.createWriteStream(outputName));
+    }
 
     for (const file of files) {
       try {
@@ -73,16 +81,26 @@ async function convertToPDF(inputPath) {
           content = cleanupContent(content, fileExt);
         }
 
-        doc.fontSize(14).text(relativePath, { underline: true });
-        doc.fontSize(10).text(content);
-        doc.addPage();
+        if (outputFormat === "pdf") {
+          doc.fontSize(14).text(relativePath, { underline: true });
+          doc.fontSize(10).text(content);
+          doc.addPage();
+        } else {
+          txtContent += `File: ${relativePath}\n\n${content}\n\n`;
+        }
       } catch (error) {
         console.warn(`Skipping file ${file}: ${error.message}`);
       }
     }
 
-    doc.end();
-    console.log(`PDF created successfully: ${outputPdfName}`);
+    if (outputFormat === "pdf") {
+      doc.end();
+    } else {
+      fs.writeFileSync(outputName, txtContent);
+    }
+    console.log(
+      `${outputFormat.toUpperCase()} created successfully: ${outputName}`
+    );
 
     // Clean up temporary directory
     if (localPath !== inputPath) {
@@ -150,4 +168,4 @@ function isFileAllowed(filePath) {
 // Load patterns and start conversion
 loadPatterns();
 const inputPath = process.env.INPUT_PATH || ".";
-convertToPDF(inputPath);
+convertToOutput(inputPath);
