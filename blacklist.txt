@@ -7,3 +7,4 @@
 **/.idea/**
 **/.mvn/**
 **/package-lock.json
+**/src/main/java/com/example/ecommerce/config/SecurityConfig.java

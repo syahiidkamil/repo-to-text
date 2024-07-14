@@ -43,12 +43,9 @@ async function extractZip(zipPath) {
 async function convertToOutput(inputPath) {
   const git = simpleGit();
   const outputFormat = process.env.OUTPUT_FORMAT || "pdf";
-  let doc;
-  let txtContent = "";
-
-  if (outputFormat === "pdf") {
-    doc = new PDFDocument();
-  }
+  const numChunks = parseInt(process.env.NUM_CHUNKS) || 1;
+  let docs = [];
+  let txtContents = [];
 
   try {
     let localPath = inputPath;
@@ -64,12 +61,19 @@ async function convertToOutput(inputPath) {
     // Get list of files
     const files = await getFiles(localPath);
 
-    // Create output file
-    const outputName = process.env.OUTPUT_NAME || `output.${outputFormat}`;
-    if (outputFormat === "pdf") {
-      doc.pipe(fs.createWriteStream(outputName));
+    // Create output files
+    const outputBaseName = process.env.OUTPUT_NAME || `output`;
+
+    for (let i = 0; i < numChunks; i++) {
+      if (outputFormat === "pdf") {
+        docs.push(new PDFDocument());
+        docs[i].pipe(fs.createWriteStream(`${outputBaseName}_${i + 1}.pdf`));
+      } else {
+        txtContents.push("");
+      }
     }
 
+    let currentChunk = 0;
     for (const file of files) {
       try {
         let content = fs.readFileSync(file, "utf8");
@@ -82,25 +86,43 @@ async function convertToOutput(inputPath) {
         }
 
         if (outputFormat === "pdf") {
-          doc.fontSize(14).text(relativePath, { underline: true });
-          doc.fontSize(10).text(content);
-          doc.addPage();
+          docs[currentChunk]
+            .fontSize(14)
+            .text(relativePath, { underline: true });
+          docs[currentChunk].fontSize(10).text(content);
+          docs[currentChunk].addPage();
         } else {
-          txtContent += `File: ${relativePath}\n\n${content}\n\n`;
+          txtContents[
+            currentChunk
+          ] += `File: ${relativePath}\n\n${content}\n\n`;
         }
+
+        // Move to next chunk
+        currentChunk = (currentChunk + 1) % numChunks;
       } catch (error) {
         console.warn(`Skipping file ${file}: ${error.message}`);
       }
     }
 
     if (outputFormat === "pdf") {
-      doc.end();
+      docs.forEach((doc, index) => {
+        doc.end();
+        console.log(
+          `PDF chunk ${index + 1} created successfully: ${outputBaseName}_${
+            index + 1
+          }.pdf`
+        );
+      });
     } else {
-      fs.writeFileSync(outputName, txtContent);
+      txtContents.forEach((content, index) => {
+        fs.writeFileSync(`${outputBaseName}_${index + 1}.txt`, content);
+        console.log(
+          `TXT chunk ${index + 1} created successfully: ${outputBaseName}_${
+            index + 1
+          }.txt`
+        );
+      });
     }
-    console.log(
-      `${outputFormat.toUpperCase()} created successfully: ${outputName}`
-    );
 
     // Clean up temporary directory
     if (localPath !== inputPath) {
