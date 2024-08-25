@@ -1,0 +1,17 @@
+**/*.js
+**/*.ts
+**/*.jsx
+**/*.tsx
+**/*.html
+**/*.css
+**/*.scss
+**/*.less
+**/*.json
+**/*.svg
+**/*.md
+**/package.json
+**/vite.config.js
+**/index.html
+**/tsconfig.json
+**/postcss.config.js
+**/tailwind.config.js

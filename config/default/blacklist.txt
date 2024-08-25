@@ -1,0 +1,11 @@
+**/.git/**
+**/__MACOSX/**
+**/._*
+**/.DS_Store
+**/Thumbs.db
+**/node_modules/**
+**/.idea/**
+**/.mvn/**
+**/package-lock.json
+**/pnpm-lock.yaml
+**/.svg*

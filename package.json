@@ -1,7 +1,7 @@
 {
   "name": "repo-to-pdf",
   "version": "1.1.0",
-  "description": "Convert a Git repository or zip file to PDF with advanced filtering",
+  "description": "Convert a Git Repository (zip file) to PDF with advanced filtering",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -12,5 +12,8 @@
     "dotenv": "^16.0.3",
     "adm-zip": "^0.5.10",
     "minimatch": "^5.1.0"
+  },
+  "author": {
+    "name": "Syahiid Nur Kamil"
   }
 }

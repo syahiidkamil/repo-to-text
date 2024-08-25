@@ -1,0 +1,9 @@
+**/cypress/constants/**
+**/cypress/pages/**
+**/cypress/support/**
+**/cypress/e2e/**
+**/*.js
+**/*.ts
+**/*.json
+**/cypress.json
+**/cypress.config.js

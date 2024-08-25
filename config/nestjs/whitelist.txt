@@ -1,0 +1,9 @@
+**/*.ts
+**/*.js
+**/*.json
+**/*.md
+**/src/**
+**/test/**
+**/nest-cli.json
+**/tsconfig.json
+**/package.json

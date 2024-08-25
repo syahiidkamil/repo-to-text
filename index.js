@@ -1,3 +1,4 @@
+// index.js
 require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
@@ -9,28 +10,56 @@ const minimatch = require("minimatch");
 let whitelistPatterns = [];
 let blacklistPatterns = [];
 
-function loadPatterns() {
-  const whitelistPath = process.env.WHITELIST_PATH || "./config/whitelist.txt";
-  const blacklistPath = process.env.BLACKLIST_PATH || "./config/blacklist.txt";
+function loadPatterns(projectTypes) {
+  whitelistPatterns = [];
+  blacklistPatterns = [];
 
-  try {
-    whitelistPatterns = fs
-      .readFileSync(whitelistPath, "utf8")
-      .split("\n")
-      .map((pattern) => pattern.trim())
-      .filter(Boolean);
-    console.log("Loaded whitelist patterns:", whitelistPatterns);
+  projectTypes.forEach((projectType) => {
+    const whitelistPath = path.join(
+      __dirname,
+      "config",
+      projectType,
+      "whitelist.txt"
+    );
+    const blacklistPath = path.join(
+      __dirname,
+      "config",
+      projectType,
+      "blacklist.txt"
+    );
 
-    blacklistPatterns = fs
-      .readFileSync(blacklistPath, "utf8")
-      .split("\n")
-      .map((pattern) => pattern.trim())
-      .filter(Boolean);
-    console.log("Loaded blacklist patterns:", blacklistPatterns);
-  } catch (error) {
-    console.error("Error loading patterns:", error.message);
-    process.exit(1);
-  }
+    try {
+      const whitelistContent = fs.readFileSync(whitelistPath, "utf8");
+      const blacklistContent = fs.readFileSync(blacklistPath, "utf8");
+
+      whitelistPatterns = whitelistPatterns.concat(
+        whitelistContent
+          .split("\n")
+          .map((pattern) => pattern.trim())
+          .filter(Boolean)
+      );
+      blacklistPatterns = blacklistPatterns.concat(
+        blacklistContent
+          .split("\n")
+          .map((pattern) => pattern.trim())
+          .filter(Boolean)
+      );
+
+      console.log(`Loaded patterns for ${projectType}`);
+    } catch (error) {
+      console.error(
+        `Error loading patterns for ${projectType}:`,
+        error.message
+      );
+    }
+  });
+
+  // Remove duplicates
+  whitelistPatterns = [...new Set(whitelistPatterns)];
+  blacklistPatterns = [...new Set(blacklistPatterns)];
+
+  console.log("Final whitelist patterns:", whitelistPatterns);
+  console.log("Final blacklist patterns:", blacklistPatterns);
 }
 
 async function extractZip(zipPath) {
@@ -203,15 +232,27 @@ function isFileAllowed(filePath) {
 }
 
 async function convertToOutput(inputPath) {
+  const startTime = Date.now();
+
   const outputFormat = process.env.OUTPUT_FORMAT || "pdf";
   const numChunks = parseInt(process.env.NUM_CHUNKS) || 1;
+  const projectTypes = (process.env.PROJECT_TYPE || "")
+    .split(",")
+    .map((type) => type.trim());
 
   try {
+    console.log("Starting conversion process...");
+    loadPatterns(projectTypes);
     const localPath = await getInputPath(inputPath);
+    console.log(`Input path prepared: ${localPath}`);
+
     const files = await getFiles(localPath);
+    console.log(`Found ${files.length} files to process`);
+
     const outputPath = prepareOutputPath(
       process.env.OUTPUT_PATH || path.join(__dirname, "outputs", "output")
     );
+    console.log(`Output path prepared: ${outputPath}`);
 
     const { docs, txtContents, chunkMode } = createOutputFiles(
       outputPath,
@@ -238,13 +279,20 @@ async function convertToOutput(inputPath) {
 
     if (localPath !== inputPath) {
       fs.rmSync(localPath, { recursive: true, force: true });
+      console.log("Temporary files cleaned up");
     }
+
+    const endTime = Date.now();
+    const duration = (endTime - startTime) / 1000; // Convert to seconds
+    console.log(`Conversion completed in ${duration.toFixed(2)} seconds`);
   } catch (error) {
     console.error("Error:", error.message);
+    const endTime = Date.now();
+    const duration = (endTime - startTime) / 1000; // Convert to seconds
+    console.log(`Process failed after ${duration.toFixed(2)} seconds`);
   }
 }
 
-// Load patterns and start conversion
-loadPatterns();
+// Start conversion
 const inputPath = process.env.INPUT_PATH || path.join(__dirname, "inputs");
 convertToOutput(inputPath);

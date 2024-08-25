@@ -1,0 +1,13 @@
+**/target/**
+**/build/**
+**/.gradle/**
+**/.git/**
+**/*.log
+**/.DS_Store
+**/.env
+**/.env.*
+**/*.class
+**/.mvn/**
+**/mvnw
+**/mvnw.cmd
+**/src/main/java/com/example/ecommerce/config/SecurityConfig.java
