@@ -10,8 +10,8 @@ let whitelistPatterns = [];
 let blacklistPatterns = [];
 
 function loadPatterns() {
-  const whitelistPath = process.env.WHITELIST_PATH || "./whitelist.txt";
-  const blacklistPath = process.env.BLACKLIST_PATH || "./blacklist.txt";
+  const whitelistPath = process.env.WHITELIST_PATH || "./config/whitelist.txt";
+  const blacklistPath = process.env.BLACKLIST_PATH || "./config/blacklist.txt";
 
   try {
     whitelistPatterns = fs
