@@ -18,3 +18,7 @@
 **/*.yaml
 **/*.yml
 **/*.properties
+**/cypress/constants/**
+**/cypress/pages/**
+**/cypress/support/**
+**/cypress/e2e/**

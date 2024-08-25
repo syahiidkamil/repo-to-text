@@ -7,4 +7,10 @@
 **/.idea/**
 **/.mvn/**
 **/package-lock.json
+**/pnpm-lock.yaml
 **/src/main/java/com/example/ecommerce/config/SecurityConfig.java
+**/.svg*
+**/src/assets/**
+**/database/**
+**/postcss.config.js
+**/src/styles/**

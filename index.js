@@ -40,107 +40,87 @@ async function extractZip(zipPath) {
   return extractPath;
 }
 
-async function convertToOutput(inputPath) {
+async function getInputPath(inputPath) {
   const git = simpleGit();
-  const outputFormat = process.env.OUTPUT_FORMAT || "pdf";
-  const numChunks = parseInt(process.env.NUM_CHUNKS) || 1;
+  let localPath = inputPath;
+
+  if (inputPath.endsWith(".zip")) {
+    localPath = await extractZip(inputPath);
+  } else if (inputPath.startsWith("http") || inputPath.startsWith("git@")) {
+    localPath = path.join(__dirname, "temp_repo");
+    await git.clone(inputPath, localPath);
+  }
+
+  return localPath;
+}
+
+function prepareOutputPath(outputPath) {
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  return outputPath;
+}
+
+function createOutputFiles(outputPath, outputFormat, numChunks) {
+  const chunkMode = numChunks > 1;
   let docs = [];
   let txtContents = [];
 
-  try {
-    let localPath = inputPath;
-
-    // Handle different input types
-    if (inputPath.endsWith(".zip")) {
-      localPath = await extractZip(inputPath);
-    } else if (inputPath.startsWith("http") || inputPath.startsWith("git@")) {
-      localPath = path.join(__dirname, "temp_repo");
-      await git.clone(inputPath, localPath);
-    }
-
-    // Get list of files
-    const files = await getFiles(localPath);
-
-    // Create output files
-    const outputBaseName = process.env.OUTPUT_NAME || `output`;
-
+  if (chunkMode) {
     for (let i = 0; i < numChunks; i++) {
       if (outputFormat === "pdf") {
         docs.push(new PDFDocument());
-        docs[i].pipe(fs.createWriteStream(`${outputBaseName}_${i + 1}.pdf`));
+        docs[i].pipe(fs.createWriteStream(`${outputPath}_${i + 1}.pdf`));
       } else {
         txtContents.push("");
       }
     }
+  } else {
+    if (outputFormat === "pdf") {
+      docs.push(new PDFDocument());
+      docs[0].pipe(fs.createWriteStream(`${outputPath}.pdf`));
+    } else {
+      txtContents.push("");
+    }
+  }
 
-    let currentChunk = 0;
-    for (const file of files) {
-      try {
-        let content = fs.readFileSync(file, "utf8");
-        const relativePath = path.relative(localPath, file);
-        const fileExt = path.extname(file).toLowerCase();
+  return { docs, txtContents, chunkMode };
+}
 
-        // Preprocess content based on file type
-        if (fileExt === ".xml" || fileExt === ".json") {
-          content = cleanupContent(content, fileExt);
-        }
+function processFile(
+  file,
+  localPath,
+  docs,
+  txtContents,
+  outputFormat,
+  currentChunk
+) {
+  try {
+    let content = fs.readFileSync(file, "utf8");
+    const relativePath = path.relative(localPath, file);
+    const fileExt = path.extname(file).toLowerCase();
 
-        if (outputFormat === "pdf") {
-          docs[currentChunk]
-            .fontSize(14)
-            .text(relativePath, { underline: true });
-          docs[currentChunk].fontSize(10).text(content);
-          docs[currentChunk].addPage();
-        } else {
-          txtContents[
-            currentChunk
-          ] += `File: ${relativePath}\n\n${content}\n\n`;
-        }
-
-        // Move to next chunk
-        currentChunk = (currentChunk + 1) % numChunks;
-      } catch (error) {
-        console.warn(`Skipping file ${file}: ${error.message}`);
-      }
+    if (fileExt === ".xml" || fileExt === ".json") {
+      content = cleanupContent(content, fileExt);
     }
 
     if (outputFormat === "pdf") {
-      docs.forEach((doc, index) => {
-        doc.end();
-        console.log(
-          `PDF chunk ${index + 1} created successfully: ${outputBaseName}_${
-            index + 1
-          }.pdf`
-        );
-      });
+      docs[currentChunk].fontSize(14).text(relativePath, { underline: true });
+      docs[currentChunk].fontSize(10).text(content);
+      docs[currentChunk].addPage();
     } else {
-      txtContents.forEach((content, index) => {
-        fs.writeFileSync(`${outputBaseName}_${index + 1}.txt`, content);
-        console.log(
-          `TXT chunk ${index + 1} created successfully: ${outputBaseName}_${
-            index + 1
-          }.txt`
-        );
-      });
-    }
-
-    // Clean up temporary directory
-    if (localPath !== inputPath) {
-      fs.rmSync(localPath, { recursive: true, force: true });
+      txtContents[currentChunk] += `File: ${relativePath}\n\n${content}\n\n`;
     }
   } catch (error) {
-    console.error("Error:", error.message);
+    console.warn(`Skipping file ${file}: ${error.message}`);
   }
 }
 
 function cleanupContent(content, fileExt) {
-  // Remove unwanted "TM" symbols
   content = content.replace(/™/g, "");
-
-  // Remove non-printable characters
   content = content.replace(/[^\x20-\x7E\n\r\t]/g, "");
 
-  // Attempt to parse and re-stringify JSON to fix formatting
   if (fileExt === ".json") {
     try {
       const parsedJson = JSON.parse(content);
@@ -150,14 +130,52 @@ function cleanupContent(content, fileExt) {
     }
   }
 
-  // For XML, we could use a library like 'xml2js' for more robust parsing and reformatting
-  // For simplicity, we'll just do basic cleanup here
   if (fileExt === ".xml") {
     content = content.replace(/>\s+</g, "><");
     content = content.replace(/(<[^>]+>)/g, "\n$1");
   }
 
   return content;
+}
+
+function saveOutputFiles(
+  docs,
+  txtContents,
+  outputPath,
+  outputFormat,
+  chunkMode
+) {
+  if (outputFormat === "pdf") {
+    docs.forEach((doc, index) => {
+      doc.end();
+      const fileName = chunkMode
+        ? `${path.basename(outputPath)}_${index + 1}.pdf`
+        : `${path.basename(outputPath)}.pdf`;
+      console.log(
+        `PDF ${
+          chunkMode ? `chunk ${index + 1}` : "file"
+        } created successfully: ${path.join(
+          path.dirname(outputPath),
+          fileName
+        )}`
+      );
+    });
+  } else {
+    txtContents.forEach((content, index) => {
+      const fileName = chunkMode
+        ? `${path.basename(outputPath)}_${index + 1}.txt`
+        : `${path.basename(outputPath)}.txt`;
+      fs.writeFileSync(path.join(path.dirname(outputPath), fileName), content);
+      console.log(
+        `TXT ${
+          chunkMode ? `chunk ${index + 1}` : "file"
+        } created successfully: ${path.join(
+          path.dirname(outputPath),
+          fileName
+        )}`
+      );
+    });
+  }
 }
 
 async function getFiles(dir) {
@@ -172,7 +190,6 @@ async function getFiles(dir) {
 }
 
 function isFileAllowed(filePath) {
-  // Check blacklist first
   if (
     blacklistPatterns.some((pattern) =>
       minimatch(filePath, pattern, { dot: true })
@@ -180,14 +197,54 @@ function isFileAllowed(filePath) {
   ) {
     return false;
   }
-
-  // Then check whitelist
   return whitelistPatterns.some((pattern) =>
     minimatch(filePath, pattern, { dot: true })
   );
 }
 
+async function convertToOutput(inputPath) {
+  const outputFormat = process.env.OUTPUT_FORMAT || "pdf";
+  const numChunks = parseInt(process.env.NUM_CHUNKS) || 1;
+
+  try {
+    const localPath = await getInputPath(inputPath);
+    const files = await getFiles(localPath);
+    const outputPath = prepareOutputPath(
+      process.env.OUTPUT_PATH || path.join(__dirname, "outputs", "output")
+    );
+
+    const { docs, txtContents, chunkMode } = createOutputFiles(
+      outputPath,
+      outputFormat,
+      numChunks
+    );
+
+    let currentChunk = 0;
+    for (const file of files) {
+      processFile(
+        file,
+        localPath,
+        docs,
+        txtContents,
+        outputFormat,
+        currentChunk
+      );
+      if (chunkMode) {
+        currentChunk = (currentChunk + 1) % numChunks;
+      }
+    }
+
+    saveOutputFiles(docs, txtContents, outputPath, outputFormat, chunkMode);
+
+    if (localPath !== inputPath) {
+      fs.rmSync(localPath, { recursive: true, force: true });
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+  }
+}
+
 // Load patterns and start conversion
 loadPatterns();
-const inputPath = process.env.INPUT_PATH || ".";
+const inputPath = process.env.INPUT_PATH || path.join(__dirname, "inputs");
 convertToOutput(inputPath);
