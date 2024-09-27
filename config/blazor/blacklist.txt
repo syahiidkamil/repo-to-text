@@ -1,0 +1,17 @@
+**/bin/**
+**/obj/**
+**/.vs/**
+**/.vscode/**
+**/.git/**
+**/*.log
+**/.DS_Store
+**/.env
+**/.env.*
+**/node_modules/**
+**/wwwroot/lib/**
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.dbmdl
+**/*.jfm
+**/packages/**
