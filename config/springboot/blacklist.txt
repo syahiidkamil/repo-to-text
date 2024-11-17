@@ -1,4 +1,5 @@
 **/target/**
+**/.idea/**
 **/build/**
 **/.gradle/**
 **/.git/**
@@ -11,3 +12,4 @@
 **/mvnw
 **/mvnw.cmd
 **/src/main/java/com/example/ecommerce/config/SecurityConfig.java
+**/src/main/java/be/turingcamp/vttp/config/security/SecurityConfig.java

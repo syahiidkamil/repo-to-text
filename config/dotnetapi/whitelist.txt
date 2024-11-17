@@ -1,0 +1,54 @@
+# Core application files
+**/*.cs
+**/*.csproj
+**/*.sln
+**/Program.cs
+**/Startup.cs
+**/appsettings.json
+**/Properties/launchSettings.json
+
+# API Controllers and Features
+**/Controllers/**/*.cs
+**/Features/**/*.cs
+**/Endpoints/**/*.cs
+
+# Data and Models
+**/Data/**/*.cs
+**/Models/**/*.cs
+**/Entities/**/*.cs
+**/DTOs/**/*.cs
+**/ViewModels/**/*.cs
+
+# Business Logic and Services
+**/Services/**/*.cs
+**/Repositories/**/*.cs
+**/Helpers/**/*.cs
+**/Utils/**/*.cs
+
+# Configuration and DI
+**/Configurations/**/*.cs
+**/Extensions/**/*.cs
+**/DependencyInjection/**/*.cs
+
+# Authentication and Security
+**/Auth/**/*.cs
+**/Security/**/*.cs
+**/Identity/**/*.cs
+
+# Middleware and Filters
+**/Middleware/**/*.cs
+**/Filters/**/*.cs
+
+# API Documentation
+**/swagger.json
+**/swagger.yaml
+**/*.md
+**/README.md
+
+# Database
+**/Migrations/**/*.cs
+**/DbContexts/**/*.cs
+
+# Configuration files
+**/web.config
+**/app.config

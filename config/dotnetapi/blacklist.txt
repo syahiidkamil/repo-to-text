@@ -1,0 +1,54 @@
+# Build outputs and dependencies
+**/bin/**
+**/obj/**
+**/Debug/**
+**/Release/**
+
+# IDE and editor files
+**/.vs/**
+**/.vscode/**
+**/.idea/**
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+
+# Dependencies and packages
+**/packages/**
+**/node_modules/**
+
+# System and hidden files
+**/.DS_Store
+**/*~
+**/*.swp
+**/*.swap
+
+# Environment and secrets
+**/.env
+**/.env.*
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/secrets.json
+
+# Database files
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/*.sqlite
+**/*.sqlite3
+
+# Logs and temporary files
+**/*.log
+**/logs/**
+**/temp/**
+**/tmp/**
+
+# Test results and coverage
+**/TestResults/**
+**/[Cc]overage/**
+**/*.coverage
+**/*.coveragexml
+
+# Documentation build output
+**/docs/_build/**
+**/[Dd]oc/[Bb]uild/**

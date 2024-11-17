@@ -1,0 +1,53 @@
+# whitelist.txt
+# Python source files
+**/*.py
+**/*.pyi
+**/*.pyx
+**/*.pxd
+
+# Configuration files
+**/*.ini
+**/*.cfg
+**/*.conf
+**/*.yaml
+**/*.yml
+**/pyproject.toml
+**/setup.py
+**/setup.cfg
+**/*requirements.txt
+**/Pipfile
+**/Pipfile.lock
+**/poetry.lock
+
+# Documentation
+**/*.rst
+**/*.md
+**/*.txt
+**/docs/**/*.html
+**/docs/**/*.md
+**/docs/**/*.rst
+**/LICENSE
+**/README*
+
+# Testing
+**/*test*.py
+**/tests/**/*.py
+**/pytest.ini
+**/.coveragerc
+**/tox.ini
+
+# Type hints
+**/py.typed
+**/*.pyi
+
+# Templates and static files
+**/templates/**/*.html
+**/templates/**/*.j2
+**/templates/**/*.jinja
+**/templates/**/*.jinja2
+**/static/**/*.css
+**/static/**/*.js
+**/static/**/*.json
+
+# Jupyter notebooks
+**/*.ipynb
