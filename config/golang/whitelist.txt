@@ -1,0 +1,10 @@
+**/*.go
+**/*.sql
+**/*.md
+**/**/*.go
+**/**/*.sql
+**/**/*.md
+**/go.mod
+**/go.sum
+**/.env.example
+**/README.md
