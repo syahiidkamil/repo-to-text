@@ -1,0 +1,46 @@
+# Build outputs
+**/bin/**
+**/build/**
+**/dist/**
+**/*.exe
+**/tmp/**
+
+# IDE and editor files
+**/.idea/**
+**/.vscode/**
+**/.vs/**
+**/*.swp
+**/*.swo
+
+# OS generated files
+**/.DS_Store
+**/.DS_Store?
+**/._*
+**/.Spotlight-V100
+**/.Trashes
+**/ehthumbs.db
+**/Thumbs.db
+
+# Logs and temporary files
+**/*.log
+**/logs/**
+**/temp/**
+**/tmp/**
+
+# Test cache
+**/*.test
+**/*.out
+**/coverage.txt
+**/.coverage
+**/.testCoverage
+
+# Environment and sensitive files
+**/.env
+**/.env.*
+**/secrets/**
+**/*.pem
+**/*.key
+**/*.crt
+
+# Dependency directories
+**/vendor/**

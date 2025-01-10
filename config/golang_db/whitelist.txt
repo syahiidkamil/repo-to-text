@@ -1,0 +1,32 @@
+# Source files
+**/*.go
+**/*laundry.go
+**/go.mod
+**/go.sum
+
+# Database files
+**/*.sql
+**/DDL.sql
+**/DML.sql
+**/database/*.sql
+**/sql/*.sql
+**/migrations/*.sql
+
+# Configuration
+**/*.env.example
+**/config/*.yaml
+**/config/*.yml
+**/config/*.json
+
+# Documentation
+**/*.md
+**/README.md
+**/*.txt
+
+# Project structure
+**/model/*.go
+**/repository/*.go
+**/service/*.go
+**/config/*.go
+**/utils/*.go
+**/db/*.go

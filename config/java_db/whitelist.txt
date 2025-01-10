@@ -1,0 +1,27 @@
+**/*.java
+**/*.properties
+**/*.yml
+**/*.yaml
+**/*.xml
+**/pom.xml
+**/build.gradle
+**/application.properties
+**/application.yml
+**/application-*.yml
+**/application-*.properties
+
+# SQL files for database setup
+**/*.sql
+**/DDL.sql
+**/DML.sql
+
+# Documentation
+**/*.md
+**/README.md
+
+# Config files
+**/*.json
+**/config/*.properties
+**/config/*.yml
+**/resources/*.properties
+**/resources/*.yml
