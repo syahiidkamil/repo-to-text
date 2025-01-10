@@ -1,6 +1,6 @@
-# Repo-to-PDF/Text Converter
+# repo-to-text Repo to Text Converter
 
-Converts Git repositories, directories, or zip files into searchable PDF/text documents with filtering capabilities.
+Converts Git repositories, directories, or zip files into searchable TXT or PDF documents with filtering capabilities.
 
 ## Quick Start
 
@@ -62,5 +62,3 @@ PROJECT_TYPE=springboot,reactvite,java_db
 
 - Files are generated in the specified OUTPUT_PATH
 - Format follows: `output.txt` or `output_1.txt`, `output_2.txt` (if using chunks)
-
-For detailed documentation, see FULLREADME.md.
