@@ -1,1 +1,9 @@
 **/package.json
+**/*.js
+**/*.ts
+**/*.jsx
+**/*.tsx
+**/.env
+**/config/**
+**/config/**/*.txt
+**/*.txt
