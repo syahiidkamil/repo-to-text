@@ -7,11 +7,12 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "simple-git": "^3.19.0",
-    "pdfkit": "^0.13.0",
-    "dotenv": "^16.0.3",
     "adm-zip": "^0.5.10",
-    "minimatch": "^5.1.0"
+    "docx": "^9.1.1",
+    "dotenv": "^16.0.3",
+    "minimatch": "^5.1.0",
+    "pdfkit": "^0.13.0",
+    "simple-git": "^3.19.0"
   },
   "author": {
     "name": "Syahiid Nur Kamil"

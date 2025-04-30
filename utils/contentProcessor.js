@@ -2,6 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
+const { Document, Packer, Paragraph, TextRun } = require("docx");
 
 function cleanupContent(content, fileExt) {
   content = content.replace(/™/g, "");
@@ -35,6 +36,7 @@ function createOutputFiles(outputPath, outputFormat, numChunks) {
         docs.push(new PDFDocument());
         docs[i].pipe(fs.createWriteStream(`${outputPath}_${i + 1}.pdf`));
       } else {
+        // Both txt and docx use txtContents initially
         txtContents.push("");
       }
     }
@@ -43,6 +45,7 @@ function createOutputFiles(outputPath, outputFormat, numChunks) {
       docs.push(new PDFDocument());
       docs[0].pipe(fs.createWriteStream(`${outputPath}.pdf`));
     } else {
+      // Both txt and docx use txtContents initially
       txtContents.push("");
     }
   }
@@ -72,6 +75,7 @@ function processFile(
       docs[currentChunk].fontSize(10).text(content);
       docs[currentChunk].addPage();
     } else {
+      // Both txt and docx use same text processing
       txtContents[currentChunk] += `File: ${relativePath}\n\n${content}\n\n`;
     }
   } catch (error) {
@@ -79,7 +83,27 @@ function processFile(
   }
 }
 
-function saveOutputFiles(
+async function convertTextToDocx(text, outputPath) {
+  // Simple approach: each line becomes a paragraph with default formatting
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: text.split("\n").map(
+          (line) =>
+            new Paragraph({
+              children: [new TextRun({ text: line })],
+            })
+        ),
+      },
+    ],
+  });
+
+  const buffer = await Packer.toBuffer(doc);
+  fs.writeFileSync(outputPath, buffer);
+}
+
+async function saveOutputFiles(
   docs,
   txtContents,
   outputPath,
@@ -101,7 +125,23 @@ function saveOutputFiles(
         )}`
       );
     });
+  } else if (outputFormat === "docx") {
+    // Convert txt content to docx
+    for (let i = 0; i < txtContents.length; i++) {
+      const fileName = chunkMode
+        ? `${path.basename(outputPath)}_${i + 1}.docx`
+        : `${path.basename(outputPath)}.docx`;
+      const fullPath = path.join(path.dirname(outputPath), fileName);
+
+      await convertTextToDocx(txtContents[i], fullPath);
+      console.log(
+        `DOCX ${
+          chunkMode ? `chunk ${i + 1}` : "file"
+        } created successfully: ${fullPath}`
+      );
+    }
   } else {
+    // txt format
     txtContents.forEach((content, index) => {
       const fileName = chunkMode
         ? `${path.basename(outputPath)}_${index + 1}.txt`
@@ -124,4 +164,5 @@ module.exports = {
   createOutputFiles,
   processFile,
   saveOutputFiles,
+  convertTextToDocx,
 };

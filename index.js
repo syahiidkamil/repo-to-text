@@ -76,13 +76,22 @@ async function convertToOutput(inputPath) {
   const startTime = Date.now();
 
   const outputFormat = process.env.OUTPUT_FORMAT || "pdf";
+  // Validate output format
+  if (!["pdf", "txt", "docx"].includes(outputFormat)) {
+    throw new Error("Invalid OUTPUT_FORMAT. Must be 'pdf', 'txt', or 'docx'");
+  }
+
   const numChunks = parseInt(process.env.NUM_CHUNKS) || 1;
-  const projectTypes = (process.env.PROJECT_TYPE || "")
+  const projectTypes = (process.env.PROJECT_TYPE || "default")
     .split(",")
     .map((type) => type.trim());
 
   try {
     console.log("Starting conversion process...");
+    console.log(`Output format: ${outputFormat}`);
+    console.log(`Number of chunks: ${numChunks}`);
+    console.log(`Project types: ${projectTypes.join(", ")}`);
+
     loadPatterns(projectTypes);
     const localPath = await getInputPath(inputPath);
     console.log(`Input path prepared: ${localPath}`);
@@ -117,11 +126,15 @@ async function convertToOutput(inputPath) {
       docs[0].fontSize(10).text(folderStructure);
       docs[0].addPage();
     } else {
+      // For both txt and docx formats
       txtContents[0] =
         `Project Structure:\n\n${folderStructure}\n\n` + txtContents[0];
     }
 
     let currentChunk = 0;
+    let processedFiles = 0;
+    const totalFiles = filteredFiles.length;
+
     for (const file of filteredFiles) {
       processFile(
         file,
@@ -131,12 +144,26 @@ async function convertToOutput(inputPath) {
         outputFormat,
         currentChunk
       );
+
+      processedFiles++;
+      if (processedFiles % 10 === 0) {
+        console.log(
+          `Progress: ${processedFiles}/${totalFiles} files processed`
+        );
+      }
+
       if (chunkMode) {
         currentChunk = (currentChunk + 1) % numChunks;
       }
     }
 
-    saveOutputFiles(docs, txtContents, outputPath, outputFormat, chunkMode);
+    await saveOutputFiles(
+      docs,
+      txtContents,
+      outputPath,
+      outputFormat,
+      chunkMode
+    );
 
     if (localPath !== inputPath) {
       fs.rmSync(localPath, { recursive: true, force: true });
@@ -146,14 +173,31 @@ async function convertToOutput(inputPath) {
     const endTime = Date.now();
     const duration = (endTime - startTime) / 1000; // Convert to seconds
     console.log(`Conversion completed in ${duration.toFixed(2)} seconds`);
+    console.log(`Total files processed: ${processedFiles}`);
+    console.log(`Output format: ${outputFormat.toUpperCase()}`);
+    console.log(`Output location: ${outputPath}`);
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("Error during conversion:", error.message);
+    if (error.stack) {
+      console.error("Stack trace:", error.stack);
+    }
     const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000; // Convert to seconds
+    const duration = (endTime - startTime) / 1000;
     console.log(`Process failed after ${duration.toFixed(2)} seconds`);
+    process.exit(1);
   }
 }
 
-// Start conversion
+// Get input path from environment variable or use default
 const inputPath = process.env.INPUT_PATH || path.join(__dirname, "inputs");
-convertToOutput(inputPath);
+
+// Start the conversion process
+console.log("Starting repository conversion tool...");
+console.log(`Version: ${require("./package.json").version}`);
+console.log(`Node.js version: ${process.version}`);
+console.log("----------------------------------------");
+
+convertToOutput(inputPath).catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
