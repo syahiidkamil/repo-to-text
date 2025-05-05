@@ -3,6 +3,7 @@
 **/build/**
 **/.gradle/**
 **/.git/**
+**/.git
 **/*.log
 **/.DS_Store
 **/.env
@@ -11,3 +12,4 @@
 **/.mvn/**
 **/mvnw
 **/mvnw.cmd
+**/__MACOSX/**
