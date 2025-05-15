@@ -18,6 +18,7 @@ OUTPUT_PATH=./outputs/your_output      # Where to save output
 OUTPUT_FORMAT=txt                      # 'txt' or 'pdf'
 PROJECT_TYPE=springboot,reactvite      # Project types to process
 NUM_CHUNKS=1                          # Split output into chunks (optional)
+PATH_TYPE=relative                    # File path display type ('relative' or 'absolute')
 ```
 
 3. Add your input file:
@@ -51,11 +52,13 @@ INPUT_PATH=./inputs/backend.zip
 OUTPUT_PATH=./outputs/backend_docs
 OUTPUT_FORMAT=txt
 PROJECT_TYPE=springboot
+PATH_TYPE=relative
 
 # For multiple project types
 INPUT_PATH=./inputs/fullstack.zip
 OUTPUT_PATH=./outputs/fullstack_docs
 PROJECT_TYPE=springboot,reactvite,java_db
+PATH_TYPE=absolute
 ```
 
 ## Output

@@ -85,19 +85,25 @@ async function convertToOutput(inputPath) {
   const projectTypes = (process.env.PROJECT_TYPE || "default")
     .split(",")
     .map((type) => type.trim());
+  const pathType = process.env.PATH_TYPE || "relative";
+  // Validate path type
+  if (!["absolute", "relative"].includes(pathType)) {
+    throw new Error("Invalid PATH_TYPE. Must be 'absolute' or 'relative'");
+  }
 
   try {
     console.log("Starting conversion process...");
     console.log(`Output format: ${outputFormat}`);
     console.log(`Number of chunks: ${numChunks}`);
     console.log(`Project types: ${projectTypes.join(", ")}`);
+    console.log(`Path type: ${pathType}`);
 
     loadPatterns(projectTypes);
     const localPath = await getInputPath(inputPath);
     console.log(`Input path prepared: ${localPath}`);
 
     console.log("Mapping folder structure...");
-    const folderStructure = await mapFolderStructure(localPath);
+    const folderStructure = await mapFolderStructure(localPath, "", "", pathType);
     console.log("Folder structure mapped successfully");
 
     const files = await getFiles(localPath);
@@ -142,7 +148,8 @@ async function convertToOutput(inputPath) {
         docs,
         txtContents,
         outputFormat,
-        currentChunk
+        currentChunk,
+        pathType
       );
 
       processedFiles++;

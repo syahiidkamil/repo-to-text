@@ -59,11 +59,12 @@ function processFile(
   docs,
   txtContents,
   outputFormat,
-  currentChunk
+  currentChunk,
+  pathType = "relative"
 ) {
   try {
     let content = fs.readFileSync(file, "utf8");
-    const relativePath = path.relative(localPath, file);
+    const filePath = pathType === "absolute" ? file : path.relative(localPath, file);
     const fileExt = path.extname(file).toLowerCase();
 
     if (fileExt === ".xml" || fileExt === ".json") {
@@ -71,12 +72,12 @@ function processFile(
     }
 
     if (outputFormat === "pdf") {
-      docs[currentChunk].fontSize(14).text(relativePath, { underline: true });
+      docs[currentChunk].fontSize(14).text(filePath, { underline: true });
       docs[currentChunk].fontSize(10).text(content);
       docs[currentChunk].addPage();
     } else {
       // Both txt and docx use same text processing
-      txtContents[currentChunk] += `File: ${relativePath}\n\n${content}\n\n`;
+      txtContents[currentChunk] += `File: ${filePath}\n\n${content}\n\n`;
     }
   } catch (error) {
     console.warn(`Skipping file ${file}: ${error.message}`);

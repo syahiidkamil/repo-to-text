@@ -59,7 +59,7 @@ function isFileAllowed(filePath, whitelistPatterns, blacklistPatterns) {
 }
 
 // New function to map folder structure
-async function mapFolderStructure(dir, prefix = "", basePath = "") {
+async function mapFolderStructure(dir, prefix = "", basePath = "", pathType = "relative") {
   let structure = "";
   const entries = await fs.promises.readdir(dir, { withFileTypes: true });
   const sortedEntries = entries.sort((a, b) => {
@@ -75,8 +75,9 @@ async function mapFolderStructure(dir, prefix = "", basePath = "") {
     const connector = isLast ? "└── " : "├── ";
     const childPrefix = isLast ? prefix + "    " : prefix + "│   ";
 
-    const relativePath = path.join(basePath, entry.name);
-    structure += `${prefix}${connector}${entry.name}${
+    const entryPath = path.join(basePath, entry.name);
+    const displayName = pathType === "absolute" ? path.join(dir, entry.name) : entry.name;
+    structure += `${prefix}${connector}${displayName}${
       entry.isDirectory() ? "/" : ""
     }\n`;
 
@@ -84,7 +85,8 @@ async function mapFolderStructure(dir, prefix = "", basePath = "") {
       structure += await mapFolderStructure(
         path.join(dir, entry.name),
         childPrefix,
-        relativePath
+        entryPath,
+        pathType
       );
     }
   }
