@@ -86,6 +86,7 @@ async function convertToOutput(inputPath) {
     .split(",")
     .map((type) => type.trim());
   const pathType = process.env.PATH_TYPE || "relative";
+  const repoBasePath = process.env.REPO_BASE_PATH || "";
   // Validate path type
   if (!["absolute", "relative"].includes(pathType)) {
     throw new Error("Invalid PATH_TYPE. Must be 'absolute' or 'relative'");
@@ -96,14 +97,14 @@ async function convertToOutput(inputPath) {
     console.log(`Output format: ${outputFormat}`);
     console.log(`Number of chunks: ${numChunks}`);
     console.log(`Project types: ${projectTypes.join(", ")}`);
-    console.log(`Path type: ${pathType}`);
+    console.log(`Path type: ${pathType} ${repoBasePath ? `(Base path: ${repoBasePath})` : ""}`);
 
     loadPatterns(projectTypes);
     const localPath = await getInputPath(inputPath);
     console.log(`Input path prepared: ${localPath}`);
 
     console.log("Mapping folder structure...");
-    const folderStructure = await mapFolderStructure(localPath, "", "", pathType);
+    const folderStructure = await mapFolderStructure(localPath, "", "", pathType, repoBasePath);
     console.log("Folder structure mapped successfully");
 
     const files = await getFiles(localPath);
@@ -149,7 +150,8 @@ async function convertToOutput(inputPath) {
         txtContents,
         outputFormat,
         currentChunk,
-        pathType
+        pathType,
+        repoBasePath
       );
 
       processedFiles++;

@@ -60,11 +60,25 @@ function processFile(
   txtContents,
   outputFormat,
   currentChunk,
-  pathType = "relative"
+  pathType = "relative",
+  repoBasePath = ""
 ) {
   try {
     let content = fs.readFileSync(file, "utf8");
-    const filePath = pathType === "absolute" ? file : path.relative(localPath, file);
+    let filePath;
+    
+    if (pathType === "absolute") {
+      if (repoBasePath) {
+        // Replace the temp directory path with the repo base path
+        const relativePath = path.relative(localPath, file);
+        filePath = path.join(repoBasePath, relativePath);
+      } else {
+        filePath = file;
+      }
+    } else {
+      filePath = path.relative(localPath, file);
+    }
+    
     const fileExt = path.extname(file).toLowerCase();
 
     if (fileExt === ".xml" || fileExt === ".json") {

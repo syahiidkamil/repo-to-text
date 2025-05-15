@@ -59,7 +59,7 @@ function isFileAllowed(filePath, whitelistPatterns, blacklistPatterns) {
 }
 
 // New function to map folder structure
-async function mapFolderStructure(dir, prefix = "", basePath = "", pathType = "relative") {
+async function mapFolderStructure(dir, prefix = "", basePath = "", pathType = "relative", repoBasePath = "") {
   let structure = "";
   const entries = await fs.promises.readdir(dir, { withFileTypes: true });
   const sortedEntries = entries.sort((a, b) => {
@@ -76,7 +76,18 @@ async function mapFolderStructure(dir, prefix = "", basePath = "", pathType = "r
     const childPrefix = isLast ? prefix + "    " : prefix + "│   ";
 
     const entryPath = path.join(basePath, entry.name);
-    const displayName = pathType === "absolute" ? path.join(dir, entry.name) : entry.name;
+    // For absolute paths, replace the temp directory with the repo base path if specified
+    let displayName;
+    if (pathType === "absolute") {
+      if (repoBasePath) {
+        // Replace the temp directory path with the repo base path
+        displayName = repoBasePath ? path.join(repoBasePath, entry.name) : path.join(dir, entry.name);
+      } else {
+        displayName = path.join(dir, entry.name);
+      }
+    } else {
+      displayName = entry.name;
+    }
     structure += `${prefix}${connector}${displayName}${
       entry.isDirectory() ? "/" : ""
     }\n`;
@@ -86,7 +97,8 @@ async function mapFolderStructure(dir, prefix = "", basePath = "", pathType = "r
         path.join(dir, entry.name),
         childPrefix,
         entryPath,
-        pathType
+        pathType,
+        repoBasePath ? path.join(repoBasePath, entry.name) : ""
       );
     }
   }
